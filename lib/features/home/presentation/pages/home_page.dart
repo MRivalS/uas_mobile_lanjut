@@ -5,6 +5,7 @@ import '../../../../core/config/env_config.dart';
 import '../../../../core/di/injection.dart';
 import '../cubit/home_cubit.dart';
 import '../cubit/home_state.dart';
+import 'easter_egg_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -62,28 +63,30 @@ class _HomePageState extends State<HomePage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(
-                        Icons.account_circle,
-                        color: Colors.blueAccent,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        'NIM Anda: $_nim',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
+                      const ProfileWidget(),
+                      const SizedBox(width: 12),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'NIM Anda: $_nim',
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            'Hasil Native Kotlin (Reverse): $_reversedNim',
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: Colors.blue,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
                       ),
                     ],
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Hasil Native Kotlin (Reverse): $_reversedNim',
-                    style: const TextStyle(
-                      fontSize: 15,
-                      color: Colors.blue,
-                      fontWeight: FontWeight.w600,
-                    ),
                   ),
                   const SizedBox(height: 8),
                   ElevatedButton.icon(
@@ -99,7 +102,6 @@ class _HomePageState extends State<HomePage> {
                 ],
               ),
             ),
-
             Expanded(
               child: BlocBuilder<HomeCubit, HomeState>(
                 builder: (context, state) {
@@ -113,9 +115,7 @@ class _HomePageState extends State<HomePage> {
                       );
                     }
                     return ListView.builder(
-                      itemCount: data.length > 20
-                          ? 20
-                          : data.length, 
+                      itemCount: data.length > 20 ? 20 : data.length,
                       itemBuilder: (context, index) {
                         final item = data[index];
                         return Card(
@@ -165,6 +165,59 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class ProfileWidget extends StatefulWidget {
+  const ProfileWidget({super.key});
+
+  @override
+  State<ProfileWidget> createState() => _ProfileWidgetState();
+}
+
+class _ProfileWidgetState extends State<ProfileWidget> {
+  int _clickCount = 0;
+  DateTime? _lastClickTime;
+
+  void _handleProfileClick() {
+    final now = DateTime.now();
+
+    if (_lastClickTime == null ||
+        now.difference(_lastClickTime!) > const Duration(milliseconds: 1500)) {
+      _clickCount = 1;
+    } else {
+      _clickCount++;
+    }
+
+    _lastClickTime = now;
+
+    if (_clickCount == 6) {
+      _clickCount = 0;
+
+      Navigator.of(context).push(
+        PageRouteBuilder(
+          pageBuilder: (context, animation, secondaryAnimation) =>
+              const EasterEggPage(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return FadeTransition(opacity: animation, child: child);
+          },
+        ),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: _handleProfileClick,
+      child: const CircleAvatar(
+        radius: 26,
+        backgroundColor: Colors.blueAccent,
+        backgroundImage: AssetImage(
+          'assets/images/profile.png',
         ),
       ),
     );
